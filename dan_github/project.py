@@ -56,12 +56,12 @@ def distance():
 def buzzer():
     GPIO.output(BUZZER,GPIO.HIGH)
     time.sleep(1)
-	GPIO.output(BUZZER,GPIO.LOW)
+    GPIO.output(BUZZER,GPIO.LOW)
     time.sleep(1)
 
 def servo_open():
     p.ChangeDutyCycle(12.5)
-	print(">>Water_Gate Open")
+    print(">>Water_Gate Open")
 
 def servo_close():
     p.ChangeDutyCycle(2.5)
@@ -69,7 +69,7 @@ def servo_close():
 
 def insert_data(dan_gate):
     mydict = {"Water Level":water_level , "Days":days , "Time":hms , "Water_gate":dan_gate}
-	mycol.insert_one(mydict)
+    mycol.insert_one(mydict)
 
 
 
@@ -80,24 +80,24 @@ if __name__ == '__main__':
             water_data = "%.1f"%dist
             water_level = float(water_data)
             currentDT = datetime.datetime.now()
-		    days =currentDT.strftime("%A")
-		    hms =currentDT.strftime("%I:%M:%S %p")
+	    days =currentDT.strftime("%A")
+	    hms =currentDT.strftime("%I:%M:%S %p")
 
             if(dist<5):
-		        water_gate_open = "Open"
+		water_gate_open = "Open"
 
                 print ("Measured Distance {} cm".format(water_level))
                 print("Warning!! Water level is high ")
 
                 buzzer()
 
-        	    #servo_motor_open
-        	    servo_open()
+                #servo_motor_open
+        	servo_open()
 
-		        #insert data to mongodb
-		        insert_data(water_gate_open)
+		#insert data to mongodb
+		 insert_data(water_gate_open)
 
-		        print("______Water Level is inserted in Mongodb______")
+		 print("______Water Level is inserted in Mongodb______")
 
             else:
                 water_gate_close = "Close"
@@ -105,19 +105,19 @@ if __name__ == '__main__':
                 print("Water level is normal ")
 
                 #servo_motor_close
-        	    servo_close()
+        	servo_close()
 
                 #insert data to mongodb
                 insert_data(water_gate_close)
 
-		        print("______Water Level is inserted in Mongodb______")
+		print("______Water Level is inserted in Mongodb______")
 
             time.sleep(4)
 
         # Reset by pressing CTRL + C
     except KeyboardInterrupt:
         print("Measurement stopped by User")
-	    p.stop()
+	p.stop()
         GPIO.cleanup()
 
 
