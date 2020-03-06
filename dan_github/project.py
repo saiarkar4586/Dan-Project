@@ -53,44 +53,71 @@ def distance():
 
     return distance
 
+def buzzer():
+    GPIO.output(BUZZER,GPIO.HIGH)
+    time.sleep(1)
+	GPIO.output(BUZZER,GPIO.LOW)
+    time.sleep(1)
+
+def servo_open():
+    p.ChangeDutyCycle(12.5)
+	print(">>Water_Gate Open")
+
+def servo_close():
+    p.ChangeDutyCycle(2.5)
+    print(">>Servo_motor_Close")
+
+def insert_data(dan_gate):
+    mydict = {"Water Level":water_level , "Days":days , "Time":hms , "Water_gate":dan_gate}
+	mycol.insert_one(mydict)
+
+
+
 if __name__ == '__main__':
     try:
         while True:
             dist = distance()
+            water_data = "%.1f"%dist
+            water_level = float(water_data)
+            currentDT = datetime.datetime.now()
+		    days =currentDT.strftime("%A")
+		    hms =currentDT.strftime("%I:%M:%S %p")
+
             if(dist<5):
-		water_data = "%.1f"%dist
-		water_level = float(water_data)
+		        water_gate_open = "Open"
+
                 print ("Measured Distance {} cm".format(water_level))
                 print("Warning!! Water level is high ")
-                GPIO.output(BUZZER,GPIO.HIGH)
-                time.sleep(1)
-	        GPIO.output(BUZZER,GPIO.LOW)
-        	time.sleep(1)
-        	#servo_motor_open
-        	p.ChangeDutyCycle(12.5)
-        	print("Servo_motor_Open")
 
-		#insert data to mongodb
-		currentDT = datetime.datetime.now()
-		date =currentDT.strftime("%a, %b %d, %Y %I:%M:%S %p")
+                buzzer()
 
-		mydict = {"Water Level":water_level , "Time":date}
-		mycol.insert_one(mydict)
+        	    #servo_motor_open
+        	    servo_open()
 
-		print("Water Level is inserted in Mongodb")
-		print(type(water_level))
+		        #insert data to mongodb
+		        insert_data(water_gate_open)
+
+		        print("______Water Level is inserted in Mongodb______")
 
             else:
+                water_gate_close = "Close"
                 print ("Measured Distance = %.1f cm" % dist)
                 print("Water level is normal ")
-        	p.ChangeDutyCycle(2.5)
-        	print("Servo_motor_Close")
+
+                #servo_motor_close
+        	    servo_close()
+
+                #insert data to mongodb
+                insert_data(water_gate_close)
+
+		        print("______Water Level is inserted in Mongodb______")
+
             time.sleep(4)
 
         # Reset by pressing CTRL + C
     except KeyboardInterrupt:
         print("Measurement stopped by User")
-	p.stop()
+	    p.stop()
         GPIO.cleanup()
 
 
